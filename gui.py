@@ -5,14 +5,25 @@ import subprocess
 
 
 class Create_user(QMainWindow):
-    def __init__(self):
+    def __init__(self, other):
         super(Create_user, self).__init__()
         uic.loadUi('create_user.ui', self)
         self.reg.clicked.connect(self.try_to_create)
+        self.other = other
         self.show()
 
     def try_to_create(self):
-         subprocess.run(["out\\build\\x64-debug\\1.exe", "1", "2"])
+        if self.username.text() != "" and self.password.text() != "":
+            res = subprocess.run(["out\\build\\x64-debug\\1.exe", "reg", self.username.text(), self.password.text()], capture_output=True)
+            if res.stdout.decode("utf-8") == "user already exist":
+                self.res.setText("This user already exist")
+            else:
+                print("success")
+                self.close()
+                self.other.show()
+        else:
+            self.res.setText("Enter login and password")
+
 
 
 class Minefield(QMainWindow):
@@ -32,9 +43,10 @@ class Login(QMainWindow):
 
     def reg(self):
         if self.a is None:
-            self.a = Create_user()
-        self.close()
+            self.a = Create_user(self)
+        self.hide()
         self.a.show()
+  
 
 
 if __name__ == '__main__':
