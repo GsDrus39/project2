@@ -3,6 +3,8 @@
 #include <stdio.h>
 #include <random>
 #include <stdlib.h>
+#include <fstream>
+#include <string>
 
 using namespace std;
 
@@ -81,11 +83,13 @@ private:
 		}
 		return mines;
 	}
+public:
+	int flags[10][10];
 	void OpenButton(int i, int j, bool userClick) {
 		if (fld[i][j] != 9)
 		{
 			if (!userClick) return;
-			if (fld[i][j] == 10) { cout << "boom"; return; };
+			if (fld[i][j] == 10) { cout << i << " " << j << " " << fld[i][j] << endl; return; };
 			cout << i << " " << j << " " << fld[i][j] << endl;
 			return;
 		}
@@ -106,16 +110,54 @@ private:
 				}
 			}
 		}
+		std::ofstream out;
+		out.open("f.txt");
+		if (out.is_open())
+		{
+			for (int i = 0; i < 10; i++) {
+				for (int j = 0; j < 10; j++) {
+					out << fld[i][j] << std::endl;
+				}
+			}
 
+		}
+		out.close();
 	}
 
-public:
+	void unpack() {
+		std::string line;
+		std::ifstream in("f.txt");
+		if (in.is_open())
+		{
+			for (int i = 0; i < 10; i++) {
+				for (int j = 0; j < 10; j++) {
+					std::getline(in, line);
+					std::string a = line;
+					fld[i][j] = atoi(a.c_str());
+				}
+			}
+		}
+		in.close();
+		std::string line1;
+		std::ifstream in1("fl.txt");
+		if (in1.is_open())
+		{
+			for (int i = 0; i < 10; i++) {
+				for (int j = 0; j < 10; j++) {
+					std::getline(in1, line1);
+					std::string a = line1;
+					flags[i][j] = atoi(a.c_str());
+				}
+			}
+		}
+		in1.close();
+	}
 	
-
 	void init(int x, int y) {
 		for (int i = 0; i < 10; i++) {
 			for (int j = 0; j < 10; j++) {
 				fld[i][j] = 9;
+				flags[i][j] = 0;
 				//cout << i << " " << j << " " << fld[i][j] << "\n";
 			}
 		}
@@ -150,6 +192,33 @@ public:
 		else {
 			cout << x << " " << y << " " << mines << "\n";
 		}
+		std::ofstream out;
+		out.open("f.txt");
+		if (out.is_open())
+		{
+			for (int i = 0; i < 10; i++) {
+				for (int j = 0; j < 10; j++) {
+					out << fld[i][j] << std::endl;
+				}
+			}
+			
+		}
+		out.close();
+		std::ofstream out1;
+		out1.open("fl.txt");
+		if (out1.is_open())
+		{
+			for (int i = 0; i < 10; i++) {
+				for (int j = 0; j < 10; j++) {
+					out1 << flags[i][j] << std::endl;
+				}
+			}
+
+		}
+		out1.close();
+	}
+	int get_cell(int x, int y) {
+		return fld[x][y];
 	}
 };
 
@@ -196,12 +265,50 @@ int main(int argc, char *argv[])
 			field.init(i, j);
 		}
 		else if (act == "opn") {
+			std::string act1 = argv[4];
 			std::string a = argv[2];
 			std::string b = argv[3];
 			int i = atoi(a.c_str());
 			int j = atoi(b.c_str());
-			//field field;
-			//field.OpenButton(i, j, true);
+			field field;
+			field.unpack();
+			if (act1 == "Left") {
+				field.OpenButton(i, j, true);
+			}
+			else {
+				if (field.flags[i][j] == 1) {
+					cout << a << " " << b << " " << 13;
+					field.flags[i][j] = 0;
+				}
+				else {
+					cout << a << " " << b << " " << 12;
+					field.flags[i][j] = 1;
+				}
+				std::ofstream out;
+				out.open("f.txt");
+				if (out.is_open())
+				{
+					for (int i = 0; i < 10; i++) {
+						for (int j = 0; j < 10; j++) {
+							out << field.get_cell(i, j) << std::endl;
+						}
+					}
+
+				}
+				out.close();
+				std::ofstream out1;
+				out1.open("fl.txt");
+				if (out1.is_open())
+				{
+					for (int i = 0; i < 10; i++) {
+						for (int j = 0; j < 10; j++) {
+							out1 << field.flags[i][j] << std::endl;
+						}
+					}
+
+				}
+				out1.close();
+			}
 		}
 		return 0;
 	}

@@ -64,11 +64,36 @@ class Minefield(QMainWindow):
             for k in rs.split('\n')[:-1]:
                 x, y, val = list(map(int, k.split()))
                 btn = self.gridLayout.itemAtPosition(x, y).widget()
-                btn.setText(str(val))
+                if val != 11 and val != 9:
+                    btn.setText(str(val))
+                btn.setEnabled(False)
             self.first = False
         else:
             res = subprocess.run(["out\\build\\x64-debug\\1.exe", "opn",
                                  str(i), str(j), button.clicked_with], capture_output=True)
+            rs = res.stdout.decode("utf-8").replace("\r", "")
+            print(rs)
+            if len(rs.split('\n')) == 1:
+                rs += "\n"
+            for k in rs.split('\n')[:-1]:
+                x, y, val = list(map(int, k.split()))
+                btn = self.gridLayout.itemAtPosition(x, y).widget()
+                if val != 11 and val != 9:
+                    if val == 10:
+                        btn.setStyleSheet('QPushButton {background-color: red}')
+                        btn.setEnabled(False)
+                        return
+                    if val == 12:
+                        btn.setText("M")
+                        return
+                    if val == 13:
+                        btn.setText("")
+                        return
+                    btn.setText(str(val))
+                else:
+                    btn.setText("")
+                btn.setEnabled(False)
+
 
 
 
