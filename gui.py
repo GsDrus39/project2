@@ -8,11 +8,11 @@ class Create_user(QMainWindow):
     def __init__(self, other):
         super(Create_user, self).__init__()
         uic.loadUi('create_user.ui', self)
-        self.reg.clicked.connect(self.try_to_create)
+        self.reg.clicked.connect(self.create)
         self.other = other
         self.show()
 
-    def try_to_create(self):
+    def create(self):
         if self.username.text() != "" and self.password.text() != "":
             res = subprocess.run(["out\\build\\x64-debug\\1.exe", "reg", self.username.text(), self.password.text()], capture_output=True)
             if res.stdout.decode("utf-8") == "user already exist":
@@ -37,8 +37,10 @@ class Login(QMainWindow):
     def __init__(self):
         super(Login, self).__init__()
         self.a = None
+        self.b = None
         uic.loadUi('login.ui', self)
         self.createuser.clicked.connect(self.reg)
+        self.enter.clicked.connect(self.ent)
         self.show()
 
     def reg(self):
@@ -46,6 +48,23 @@ class Login(QMainWindow):
             self.a = Create_user(self)
         self.hide()
         self.a.show()
+
+    def ent(self):
+        if self.login.text() != "" and self.password.text() != "":
+            res = subprocess.run(["out\\build\\x64-debug\\1.exe", "ent", self.login.text(), self.password.text()], capture_output=True)
+            print(res.stdout.decode("utf-8"))
+            if res.stdout.decode("utf-8") == "invalid login or password":
+                self.res.setText("Invalid login or password")
+            else:
+                if self.b is None:
+                    self.b = Minefield()
+                self.hide()
+                self.b.show()
+        else:
+            self.res.setText("Enter login and password")
+            
+
+
   
 
 

@@ -8,14 +8,23 @@ const char* SQL = "CREATE TABLE IF NOT EXISTS users(id INTEGER PRIMARY KEY AUTOI
 const char* SQL1 = "INSERT INTO users(username, password) VALUES('GsD7', 1234)";
 const char* SQL2 = "SELECT * FROM users WHERE username='GsD10'";
 bool flag = true;
+bool flag1 = false;
+
+
 static int found_user(void* unused, int count, char** data, char** columns)
 {
-	if (count) { cout << "user already exist"; flag = false; }
+	cout << "user already exist"; flag = false;
 	return 0;
 }
 
 static int deft(void* unused, int count, char** data, char** columns)
 {
+	return 0;
+}
+
+static int got_pair(void* unused, int count, char** data, char** columns)
+{
+	cout << "pair of login and password is valid"; flag1 = true;
 	return 0;
 }
 
@@ -37,7 +46,6 @@ public:
 
 	const char* execute(const char* sql, static int callback(void* unused, int count, char** data, char** columns)) {
 		if (sqlite3_exec(db, sql, callback, NULL, &err)) {
-			if (err == "") { cout << false; }
 			return err;
 		}
 		else {
@@ -68,6 +76,21 @@ int main(int argc, char *argv[])
 				std::string sql1 = "INSERT INTO users(username, password) VALUES('" + user + "', " + password + ")";
 				const char* SQL1 = sql1.c_str();
 				db.execute(SQL1, deft);
+			}
+		}
+		else if (act == "ent") {
+			std::string user = argv[2];
+			std::string password = argv[3];
+			std::string sql = "SELECT * FROM users WHERE username='" + user + "' AND password='" + password + "'";
+			const char* SQL = sql.c_str();
+			Database db;
+			db.open();
+			db.execute(SQL, got_pair);
+			std::string sql1 = "SELECT * FROM users WHERE username='" + user + "' AND password=" + password;
+			const char* SQL1 = sql1.c_str();
+			db.execute(SQL1, got_pair);
+			if (not flag1) {
+				cout << "invalid login or password";
 			}
 		}
 		return 0;
