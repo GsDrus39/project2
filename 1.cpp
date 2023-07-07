@@ -33,7 +33,6 @@ class Database {
 private:
 	sqlite3* db = 0;
 	char* err = 0;
-	
 public:
 	const char* open() {
 		if (sqlite3_open("out\\build\\x64-debug\\database.dblite", &db)) {
@@ -56,7 +55,6 @@ public:
 	void close() {
 		sqlite3_close(db);
 	}
-
 };
 
 

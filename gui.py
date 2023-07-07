@@ -1,8 +1,10 @@
-from PyQt6.QtWidgets import QApplication, QMainWindow
-from PyQt6 import uic, QtGui
+from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton
+from PyQt5 import uic, QtGui, QtCore, Qt
 import sys
 import subprocess
-
+from PyQt5 import *
+from PyQt5.QtCore import *
+from PyQt5.Qt import *
 
 class Create_user(QMainWindow):
     def __init__(self, other):
@@ -25,12 +27,36 @@ class Create_user(QMainWindow):
             self.res.setText("Enter login and password")
 
 
+class CustomButton(QPushButton):
+    def __init__(self):
+        super(CustomButton, self).__init__()
+        self.clicked_with = None
+
+    def mousePressEvent(self, QMouseEvent):
+        if QMouseEvent.button() == Qt.LeftButton:
+            self.clicked_with = "Left"
+        if QMouseEvent.button() == Qt.LeftButton and QMouseEvent.modifiers() == Qt.ShiftModifier:
+            self.clicked_with = "Left+Shift"     
+        QPushButton.mousePressEvent(self, QMouseEvent)
+
+
 
 class Minefield(QMainWindow):
     def __init__(self):
         super(Minefield, self).__init__()
         uic.loadUi('field.ui', self)
+        for i in range(10):
+            for j in range(10):
+                button = CustomButton()
+                button.setFixedSize(50, 50)
+                button.clicked.connect(
+                    lambda checked, button=button, i=i, j=j: self.f(button, i, j)
+                )
+                self.gridLayout.addWidget(button, i, j)
         self.show()
+
+    def f(self, button, i, j):
+        print(button, i, j)
 
 
 class Login(QMainWindow):
