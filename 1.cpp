@@ -1,6 +1,8 @@
 ﻿#include "1.h"
 #include "sqlite3.h"
 #include <stdio.h>
+#include <random>
+#include <stdlib.h>
 
 using namespace std;
 
@@ -58,6 +60,100 @@ public:
 };
 
 
+class field {
+private:
+	int minesNumber = 15;
+	int fld[10][10];
+	int count_mines(int x, int y) {
+		if (fld[x][y] == 10) {
+			return 10;
+		}
+		int mines = 0;
+		for (int k = -1; k < 2; k++)
+		{
+			for (int l = -1; l < 2; l++)
+			{
+				int posI = x + k;
+				int posJ = y + l;
+				if (l != 2 && k != 2 && posI >= 0 && posI < 10 && posJ >= 0 && posJ < 10 && fld[posI][posJ] == 10)
+					mines++;
+			}
+		}
+		return mines;
+	}
+	void OpenButton(int i, int j, bool userClick) {
+		if (fld[i][j] != 9)
+		{
+			if (!userClick) return;
+			if (fld[i][j] == 10) { cout << "boom"; return; };
+			cout << i << " " << j << " " << fld[i][j] << endl;
+			return;
+		}
+		int a = count_mines(i, j);
+		if (a != 0) { cout << i << " " << j << " " << a << endl; fld[i][j] = a;  return; }
+		fld[i][j] = 11;
+		for (int k = -1; k < 2; k++)
+		{
+			for (int l = -1; l < 2; l++)
+			{
+				int posI = i + k;
+				int posJ = j + l;
+				if (l != 2 && k != 2 && posI >= 0 && posI < 10 && posJ >= 0 && posJ < 10 && fld[posI][posJ] != 10)
+				{
+					cout << posI << " " << posJ << " " << fld[posI][posJ] << "\n";
+					if (fld[posI][posJ] == 9)
+						OpenButton(posI, posJ, false);
+				}
+			}
+		}
+
+	}
+
+public:
+	
+
+	void init(int x, int y) {
+		for (int i = 0; i < 10; i++) {
+			for (int j = 0; j < 10; j++) {
+				fld[i][j] = 9;
+				//cout << i << " " << j << " " << fld[i][j] << "\n";
+			}
+		}
+		random_device rd;
+		mt19937 gen(rd());
+		uniform_int_distribution<> dist(0, 9);
+		for (int i = 0; i < minesNumber; i++) {
+			int a, b;
+			do {
+				a = dist(gen);
+				b = dist(gen);
+			} while ((a == x and b == y) or (fld[a][b] == 10));
+			fld[a][b] = 10;
+			//cout << a << " " << b << " " << fld[a][b] << "\n";
+		}
+		int mines = 0;
+		for (int k = -1; k < 2; k++)
+		{
+			for (int l = -1; l < 2; l++)
+			{
+				int posI = x + k;
+				int posJ = y + l;
+				if (l != 2 && k != 2 && posI >= 0 && posI < 10 && posJ >= 0 && posJ < 10 && fld[posI][posJ] == 10)
+					mines++;
+			}
+		}
+		fld[x][y] = mines;
+		if (mines == 0) {
+			fld[x][y] = 9;
+			OpenButton(x, y, true);
+		}
+		else {
+			cout << x << " " << y << " " << mines << "\n";
+		}
+	}
+};
+
+
 int main(int argc, char *argv[])
 {
 	if (argc >= 2) {
@@ -90,6 +186,22 @@ int main(int argc, char *argv[])
 			if (not flag1) {
 				cout << "invalid login or password";
 			}
+		}
+		else if (act == "cre") {
+			std::string a = argv[2];
+			std::string b = argv[3];
+			int i = atoi(a.c_str());
+			int j = atoi(b.c_str());
+			field field;
+			field.init(i, j);
+		}
+		else if (act == "opn") {
+			std::string a = argv[2];
+			std::string b = argv[3];
+			int i = atoi(a.c_str());
+			int j = atoi(b.c_str());
+			//field field;
+			//field.OpenButton(i, j, true);
 		}
 		return 0;
 	}

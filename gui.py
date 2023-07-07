@@ -45,18 +45,31 @@ class Minefield(QMainWindow):
     def __init__(self):
         super(Minefield, self).__init__()
         uic.loadUi('field.ui', self)
+        self.first = True
         for i in range(10):
             for j in range(10):
                 button = CustomButton()
                 button.setFixedSize(50, 50)
                 button.clicked.connect(
-                    lambda checked, button=button, i=i, j=j: self.f(button, i, j)
+                    lambda checked, button=button, i=i, j=j: self.interact(button, i, j)
                 )
                 self.gridLayout.addWidget(button, i, j)
         self.show()
 
-    def f(self, button, i, j):
-        print(button, i, j)
+    def interact(self, button, i, j):
+        if self.first:
+            res = subprocess.run(["out\\build\\x64-debug\\1.exe", "cre",
+                                 str(i), str(j)], capture_output=True)
+            rs = res.stdout.decode("utf-8").replace("\r", "")
+            for k in rs.split('\n')[:-1]:
+                x, y, val = list(map(int, k.split()))
+                btn = self.gridLayout.itemAtPosition(x, y).widget()
+                btn.setText(str(val))
+            self.first = False
+        else:
+            res = subprocess.run(["out\\build\\x64-debug\\1.exe", "opn",
+                                 str(i), str(j), button.clicked_with], capture_output=True)
+
 
 
 class Login(QMainWindow):
@@ -77,7 +90,8 @@ class Login(QMainWindow):
 
     def ent(self):
         if self.login.text() != "" and self.password.text() != "":
-            res = subprocess.run(["out\\build\\x64-debug\\1.exe", "ent", self.login.text(), self.password.text()], capture_output=True)
+            res = subprocess.run(["out\\build\\x64-debug\\1.exe", "ent",
+                                 self.login.text(), self.password.text()], capture_output=True)
             print(res.stdout.decode("utf-8"))
             if res.stdout.decode("utf-8") == "invalid login or password":
                 self.res.setText("Invalid login or password")
