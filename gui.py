@@ -5,6 +5,7 @@ import subprocess
 from PyQt5 import *
 from PyQt5.QtCore import *
 from PyQt5.Qt import *
+import time
 
 class Create_user(QMainWindow):
     def __init__(self, other):
@@ -42,9 +43,12 @@ class CustomButton(QPushButton):
 
 
 class Minefield(QMainWindow):
+    singleton: 'Minefield' = None
     def __init__(self):
         super(Minefield, self).__init__()
         uic.loadUi('field.ui', self)
+        self.start = None
+        self.res = None
         self.first = True
         for i in range(10):
             for j in range(10):
@@ -54,10 +58,26 @@ class Minefield(QMainWindow):
                     lambda checked, button=button, i=i, j=j: self.interact(button, i, j)
                 )
                 self.gridLayout.addWidget(button, i, j)
+        self.action.triggered.connect(self.rs)
+        self.action_2.triggered.connect(self.relogin)
         self.show()
+
+    def rs(self):
+        self.close()
+        self.restart()
+
+    def relogin(self):
+        self.close()
+        window.show()
+        
+    @staticmethod
+    def restart():
+        Minefield.singleton = Minefield()
+        
 
     def interact(self, button, i, j):
         if self.first:
+            self.start = time.time()
             res = subprocess.run(["out\\build\\x64-debug\\1.exe", "cre",
                                  str(i), str(j)], capture_output=True)
             rs = res.stdout.decode("utf-8").replace("\r", "")
@@ -70,24 +90,40 @@ class Minefield(QMainWindow):
             self.first = False
         else:
             res = subprocess.run(["out\\build\\x64-debug\\1.exe", "opn",
-                                 str(i), str(j), button.clicked_with], capture_output=True)
+                                 str(i), str(j), button.clicked_with],
+                                 capture_output=True)
             rs = res.stdout.decode("utf-8").replace("\r", "")
-            print(rs)
             if len(rs.split('\n')) == 1:
                 rs += "\n"
             for k in rs.split('\n')[:-1]:
-                x, y, val = list(map(int, k.split()))
+                try:
+                    x, y, val = list(map(int, k.split()))
+                except ValueError:
+                    x, y, val = 0, 0, "You won"
                 btn = self.gridLayout.itemAtPosition(x, y).widget()
                 if val != 11 and val != 9:
                     if val == 10:
                         btn.setStyleSheet('QPushButton {background-color: red}')
-                        btn.setEnabled(False)
+                        for i in range(10):
+                            for j in range(10):
+                                bt = self.gridLayout.itemAtPosition(i, j).widget()
+                                bt.setEnabled(False)
+                        self.winOrNot.setText("You loose!")
                         return
                     if val == 12:
                         btn.setText("M")
                         return
                     if val == 13:
                         btn.setText("")
+                        return
+                    if val == "You won":
+                        for i in range(10):
+                            for j in range(10):
+                                bt = self.gridLayout.itemAtPosition(i, j).widget()
+                                bt.setEnabled(False)
+                        self.winOrNot.setText("You won!")
+                        self.res = time.time() - self.start
+                        self.label.setText(f"Time: {self.res} s")
                         return
                     btn.setText(str(val))
                 else:
@@ -117,7 +153,6 @@ class Login(QMainWindow):
         if self.login.text() != "" and self.password.text() != "":
             res = subprocess.run(["out\\build\\x64-debug\\1.exe", "ent",
                                  self.login.text(), self.password.text()], capture_output=True)
-            print(res.stdout.decode("utf-8"))
             if res.stdout.decode("utf-8") == "invalid login or password":
                 self.res.setText("Invalid login or password")
             else:

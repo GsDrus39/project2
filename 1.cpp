@@ -8,8 +8,8 @@
 
 using namespace std;
 
-const char* SQL = "CREATE TABLE IF NOT EXISTS users(id INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE, username UNIQUE, password)";
-const char* SQL1 = "INSERT INTO users(username, password) VALUES('GsD7', 1234)";
+const char* SQL = "CREATE TABLE IF NOT EXISTS users(id INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE, username STRING UNIQUE, password)";
+const char* SQL1 = "INSERT INTO users(username, password) VALUES('GsD', 'qwer')";
 const char* SQL2 = "SELECT * FROM users WHERE username='GsD10'";
 bool flag = true;
 bool flag1 = false;
@@ -225,6 +225,9 @@ public:
 
 int main(int argc, char *argv[])
 {
+	Database db;
+	db.open();
+	db.execute(SQL, deft);
 	if (argc >= 2) {
 		std::string act = argv[1];
 		if (act == "reg") {
@@ -236,7 +239,7 @@ int main(int argc, char *argv[])
 			db.open();
 			db.execute(SQL, found_user);
 			if (flag) {
-				std::string sql1 = "INSERT INTO users(username, password) VALUES('" + user + "', " + password + ")";
+				std::string sql1 = "INSERT INTO users(username, password) VALUES('" + user + "', '" + password + "')";
 				const char* SQL1 = sql1.c_str();
 				db.execute(SQL1, deft);
 			}
@@ -308,15 +311,21 @@ int main(int argc, char *argv[])
 
 				}
 				out1.close();
+				int counter = 0;
+				for (int i = 0; i < 10; i++) {
+					for (int j = 0; j < 10; j++) {
+						if (field.flags[i][j] == 1 and field.get_cell(i, j) == 10) {
+							counter++;
+						}
+					}
+				}
+				if (counter == 15) {
+					cout << i << " " << j << " " << "You won";
+				}
 			}
 		}
 		return 0;
 	}
-	Database db;
-	cout << db.open() << "\n";
-	cout << db.execute(SQL, deft) << "\n";
-	cout << db.execute(SQL1, deft) << "\n";
-	cout << db.execute(SQL2, deft) << "\n";
 	db.close();
 
 	//cout << argc << "  " << argv[0] << endl;
