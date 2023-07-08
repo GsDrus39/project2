@@ -1,8 +1,9 @@
-﻿// 1.h : включаемый файл для стандартных системных включаемых файлов
-// или включаемые файлы для конкретного проекта.
-
-#pragma once
+﻿#pragma once
 
 #include <iostream>
+#include <stdio.h>
+#include <random>
+#include <stdlib.h>
+#include <fstream>
+#include <string>
 
-// TODO: установите здесь ссылки на дополнительные заголовки, требующиеся для программы.

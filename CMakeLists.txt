@@ -12,7 +12,7 @@ endif()
 project ("1")
 
 # Добавьте источник в исполняемый файл этого проекта.
-add_executable (1 "1.cpp" "1.h" "sqlite3.c" "sqlite3.h" )
+add_executable (1 "1.cpp" "1.h" "sqlite3.c" "sqlite3.h"  "database.cpp" "database.h")
 
 if (CMAKE_VERSION VERSION_GREATER 3.12)
   set_property(TARGET 1 PROPERTY CXX_STANDARD 20)

@@ -1,18 +1,11 @@
 ﻿#include "1.h"
-#include "sqlite3.h"
-#include <stdio.h>
-#include <random>
-#include <stdlib.h>
-#include <fstream>
-#include <string>
-
+#include "database.cpp"
 using namespace std;
-
+using namespace db;
 const char* SQL = "CREATE TABLE IF NOT EXISTS users(id INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE, username STRING UNIQUE, password); CREATE TABLE IF NOT EXISTS recs(id INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE, username STRING, res FLOAT)";
+
 bool flag = true;
 bool flag1 = false;
-
-
 static int found_user(void* unused, int count, char** data, char** columns)
 {
 	cout << "user already exist"; flag = false;
@@ -35,36 +28,6 @@ static int got_records(void* unused, int count, char** data, char** columns)
 	cout << data[2] << endl;
 	return 0;
 }
-
-
-class Database {
-private:
-	sqlite3* db = 0;
-	char* err = 0;
-public:
-	const char* open() {
-		if (sqlite3_open("out\\build\\x64-debug\\database.dblite", &db)) {
-			return sqlite3_errmsg(db);
-		}
-		else {
-			return "0";
-		}
-	}
-
-	const char* execute(const char* sql, static int callback(void* unused, int count, char** data, char** columns)) {
-		if (sqlite3_exec(db, sql, callback, NULL, &err)) {
-			return err;
-		}
-		else {
-			return "0";
-		}
-	}
-
-	void close() {
-		sqlite3_close(db);
-	}
-};
-
 
 class field {
 private:
@@ -229,7 +192,7 @@ public:
 
 int main(int argc, char *argv[])
 {
-	Database db;
+	db::Database db;
 	db.open();
 	db.execute(SQL, deft);
 	db.close();
@@ -240,7 +203,7 @@ int main(int argc, char *argv[])
 			std::string password = argv[3];
 			std::string sql = "SELECT * FROM users WHERE username='" + user + "'";
 			const char* SQL = sql.c_str();
-			Database db;
+			db::Database db;
 			db.open();
 			db.execute(SQL, found_user);
 			if (flag) {
@@ -254,7 +217,7 @@ int main(int argc, char *argv[])
 			std::string password = argv[3];
 			std::string sql = "SELECT * FROM users WHERE username='" + user + "' AND password='" + password + "'";
 			const char* SQL = sql.c_str();
-			Database db;
+			db::Database db;
 			db.open();
 			db.execute(SQL, got_pair);
 			std::string sql1 = "SELECT * FROM users WHERE username='" + user + "' AND password=" + password;
@@ -324,7 +287,7 @@ int main(int argc, char *argv[])
 						}
 					}
 				}
-				if (counter == 1) {
+				if (counter == 15) {
 					cout << i << " " << j << " " << "You won";
 				}
 			}
@@ -333,7 +296,7 @@ int main(int argc, char *argv[])
 			std::string name = argv[2];
 			std::string sql = "SELECT * FROM recs WHERE username='" + name + "' ORDER BY res";
 			const char* SQL = sql.c_str();
-			Database db;
+			db::Database db;
 			db.open();
 			db.execute(SQL, got_records);
 		}
@@ -342,9 +305,9 @@ int main(int argc, char *argv[])
 			std::string res = argv[3];
 			std::string sql = "INSERT INTO recs(username, res) VALUES('" + name + "', " + res + ")";
 			const char* SQL = sql.c_str();
-			Database db;
+			db::Database db;
 			db.open();
-			db.execute(SQL, got_records);
+			db.execute(SQL, deft);
 		}
 		return 0;
 	}
