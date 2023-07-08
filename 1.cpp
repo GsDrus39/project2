@@ -8,9 +8,7 @@
 
 using namespace std;
 
-const char* SQL = "CREATE TABLE IF NOT EXISTS users(id INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE, username STRING UNIQUE, password)";
-const char* SQL1 = "INSERT INTO users(username, password) VALUES('GsD', 'qwer')";
-const char* SQL2 = "SELECT * FROM users WHERE username='GsD10'";
+const char* SQL = "CREATE TABLE IF NOT EXISTS users(id INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE, username STRING UNIQUE, password); CREATE TABLE IF NOT EXISTS recs(id INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE, username STRING, res FLOAT)";
 bool flag = true;
 bool flag1 = false;
 
@@ -29,6 +27,12 @@ static int deft(void* unused, int count, char** data, char** columns)
 static int got_pair(void* unused, int count, char** data, char** columns)
 {
 	cout << "pair of login and password is valid"; flag1 = true;
+	return 0;
+}
+
+static int got_records(void* unused, int count, char** data, char** columns)
+{
+	cout << data[2] << endl;
 	return 0;
 }
 
@@ -228,6 +232,7 @@ int main(int argc, char *argv[])
 	Database db;
 	db.open();
 	db.execute(SQL, deft);
+	db.close();
 	if (argc >= 2) {
 		std::string act = argv[1];
 		if (act == "reg") {
@@ -319,14 +324,31 @@ int main(int argc, char *argv[])
 						}
 					}
 				}
-				if (counter == 15) {
+				if (counter == 1) {
 					cout << i << " " << j << " " << "You won";
 				}
 			}
 		}
+		else if (act == "rec") {
+			std::string name = argv[2];
+			std::string sql = "SELECT * FROM recs WHERE username='" + name + "' ORDER BY res";
+			const char* SQL = sql.c_str();
+			Database db;
+			db.open();
+			db.execute(SQL, got_records);
+		}
+		else if (act == "wrr") {
+			std::string name = argv[2];
+			std::string res = argv[3];
+			std::string sql = "INSERT INTO recs(username, res) VALUES('" + name + "', " + res + ")";
+			const char* SQL = sql.c_str();
+			Database db;
+			db.open();
+			db.execute(SQL, got_records);
+		}
 		return 0;
 	}
-	db.close();
+	
 
 	//cout << argc << "  " << argv[0] << endl;
 	return 0;

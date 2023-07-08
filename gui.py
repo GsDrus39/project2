@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton
+from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QLabel
 from PyQt5 import uic, QtGui, QtCore, Qt
 import sys
 import subprocess
@@ -6,6 +6,7 @@ from PyQt5 import *
 from PyQt5.QtCore import *
 from PyQt5.Qt import *
 import time
+
 
 class Create_user(QMainWindow):
     def __init__(self, other):
@@ -17,11 +18,12 @@ class Create_user(QMainWindow):
 
     def create(self):
         if self.username.text() != "" and self.password.text() != "":
-            res = subprocess.run(["out\\build\\x64-debug\\1.exe", "reg", self.username.text(), self.password.text()], capture_output=True)
+            res = subprocess.run(["out\\build\\x64-debug\\1.exe", "reg",
+                                 self.username.text(), self.password.text()],
+                                capture_output=True)
             if res.stdout.decode("utf-8") == "user already exist":
                 self.res.setText("This user already exist")
             else:
-                print("success")
                 self.close()
                 self.other.show()
         else:
@@ -42,6 +44,31 @@ class CustomButton(QPushButton):
 
 
 
+class Records(QMainWindow):
+    def __init__(self):
+        super(Records, self).__init__()
+        uic.loadUi('records.ui', self)
+        for i in range(10):
+            lb = QLabel()
+            lb.setText(str(i + 1))
+            lb1 = QLabel()
+            lb1.setText("Not enough data")
+            self.verticalLayout.addWidget(lb)
+            self.verticalLayout_2.addWidget(lb1)
+
+        self.show()
+
+    def fill(self, data):
+        data = list(filter(lambda x: x, data))
+        for i in range(len(data)):
+            try:
+                self.verticalLayout_2.itemAt(i).widget().setText(data[i])
+            except Exception:
+                pass
+
+
+
+
 class Minefield(QMainWindow):
     singleton: 'Minefield' = None
     def __init__(self):
@@ -50,6 +77,7 @@ class Minefield(QMainWindow):
         self.start = None
         self.res = None
         self.first = True
+        self.rc = None
         for i in range(10):
             for j in range(10):
                 button = CustomButton()
@@ -60,11 +88,17 @@ class Minefield(QMainWindow):
                 self.gridLayout.addWidget(button, i, j)
         self.action.triggered.connect(self.rs)
         self.action_2.triggered.connect(self.relogin)
+        self.action_3.triggered.connect(self.shrec)
         self.show()
 
     def rs(self):
         self.close()
         self.restart()
+
+    def shrec(self):
+        res = subprocess.run(["out\\build\\x64-debug\\1.exe", "rec", window.login.text()], capture_output=True)
+        self.rc = Records()
+        self.rc.fill(res.stdout.decode("utf-8").replace("\r", "").split('\n'))
 
     def relogin(self):
         self.close()
@@ -91,7 +125,7 @@ class Minefield(QMainWindow):
         else:
             res = subprocess.run(["out\\build\\x64-debug\\1.exe", "opn",
                                  str(i), str(j), button.clicked_with],
-                                 capture_output=True)
+                                capture_output=True)
             rs = res.stdout.decode("utf-8").replace("\r", "")
             if len(rs.split('\n')) == 1:
                 rs += "\n"
@@ -124,13 +158,15 @@ class Minefield(QMainWindow):
                         self.winOrNot.setText("You won!")
                         self.res = time.time() - self.start
                         self.label.setText(f"Time: {self.res} s")
+                        res = subprocess.run(["out\\build\\x64-debug\\1.exe", "wrr",
+                                             window.login.text(), str(self.res)],
+                                            capture_output=True)
+
                         return
                     btn.setText(str(val))
                 else:
                     btn.setText("")
                 btn.setEnabled(False)
-
-
 
 
 class Login(QMainWindow):
@@ -152,7 +188,8 @@ class Login(QMainWindow):
     def ent(self):
         if self.login.text() != "" and self.password.text() != "":
             res = subprocess.run(["out\\build\\x64-debug\\1.exe", "ent",
-                                 self.login.text(), self.password.text()], capture_output=True)
+                                 self.login.text(), self.password.text()],
+                                capture_output=True)
             if res.stdout.decode("utf-8") == "invalid login or password":
                 self.res.setText("Invalid login or password")
             else:
@@ -163,10 +200,6 @@ class Login(QMainWindow):
         else:
             self.res.setText("Enter login and password")
             
-
-
-  
-
 
 if __name__ == '__main__':
     app = QApplication([])
