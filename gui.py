@@ -18,7 +18,7 @@ class Create_user(QMainWindow):
 
     def create(self):
         if self.username.text() != "" and self.password.text() != "":
-            res = subprocess.run(["out\\build\\x64-debug\\1.exe", "reg",
+            res = subprocess.run(["1.exe", "reg",
                                  self.username.text(), self.password.text()],
                                 capture_output=True)
             if res.stdout.decode("utf-8") == "user already exist":
@@ -96,7 +96,7 @@ class Minefield(QMainWindow):
         self.restart()
 
     def shrec(self):
-        res = subprocess.run(["out\\build\\x64-debug\\1.exe", "rec", window.login.text()], capture_output=True)
+        res = subprocess.run(["1.exe", "rec", window.login.text()], capture_output=True)
         self.rc = Records()
         self.rc.fill(res.stdout.decode("utf-8").replace("\r", "").split('\n'))
 
@@ -112,7 +112,7 @@ class Minefield(QMainWindow):
     def interact(self, button, i, j):
         if self.first:
             self.start = time.time()
-            res = subprocess.run(["out\\build\\x64-debug\\1.exe", "cre",
+            res = subprocess.run(["1.exe", "cre",
                                  str(i), str(j)], capture_output=True)
             rs = res.stdout.decode("utf-8").replace("\r", "")
             for k in rs.split('\n')[:-1]:
@@ -123,7 +123,7 @@ class Minefield(QMainWindow):
                 btn.setEnabled(False)
             self.first = False
         else:
-            res = subprocess.run(["out\\build\\x64-debug\\1.exe", "opn",
+            res = subprocess.run(["1.exe", "opn",
                                  str(i), str(j), button.clicked_with],
                                 capture_output=True)
             rs = res.stdout.decode("utf-8").replace("\r", "")
